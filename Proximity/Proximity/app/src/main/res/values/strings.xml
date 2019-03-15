@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Proximity</string>
+    <string name="sign_up_string"><b><u>SIGN UP</u></b></string>
+    <string name="login_string"><b><u>LOGIN</u></b></string>
+    <string name="forgot_password"><u>Forgot Password?</u></string>
+    <string name="forgot_username"><u>Forgot Username?</u></string>
+    <string name="returnLogin"><u>Return to the login page</u></string>
+    <string name="title_activity_profile">ProfileActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
