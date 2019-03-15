@@ -2,6 +2,7 @@ package com.example.ieee.proximity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,12 +25,13 @@ import static java.lang.Thread.sleep;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView signUp;
+    private TextView signUp,forgotPassword;
     private Button login;
     private EditText userName, password;
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
+    boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         progressDialog = new ProgressDialog(this);
         signUp = (TextView) findViewById(R.id.signUp);
+        forgotPassword = (TextView) findViewById(R.id.forgotPassword);
         login = (Button) findViewById(R.id.Login);
         userName = (EditText) findViewById(R.id.userEmail);
         password = (EditText) findViewById(R.id.password);
@@ -49,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
             finish();
             startActivity(new Intent(MainActivity.this,DashBoardActivity.class));
         }
+
+        forgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                startActivity(new Intent(MainActivity.this,PasswordActivity.class));
+            }
+        });
 
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(userName.getText().toString().trim().isEmpty()){ //trim() eliminates the leading or trailing spaces
-                    Toast.makeText(MainActivity.this, "Please enter the UserName", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Please enter the Email", Toast.LENGTH_SHORT).show();
                 }else if(password.getText().toString().trim().isEmpty()){
                     Toast.makeText(MainActivity.this, "Please enter the Password", Toast.LENGTH_SHORT).show();
                 }else{
@@ -82,13 +93,42 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             progressDialog.dismiss();
-                            Toast.makeText(MainActivity.this,"Login Successful",Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(MainActivity.this,DashBoardActivity.class));
+                            checkEmailVerification();
                         }else{
                             progressDialog.dismiss();
                             Toast.makeText(MainActivity.this,"Login Failed",Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
+    }
+    private  void checkEmailVerification(){
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        Boolean emailflag = firebaseUser.isEmailVerified();
+
+        if(emailflag){
+            startActivity(new Intent(MainActivity.this,ProfileActivity.class));
+            Toast.makeText(MainActivity.this,"Login Successful",Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(MainActivity.this,"Please verify your email!",Toast.LENGTH_SHORT).show();
+            firebaseAuth.signOut();
+        }
+    }
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
 }

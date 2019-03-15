@@ -16,27 +16,28 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUp_Activity extends AppCompatActivity {
 
     private TextView loginPageAgain;
     private ProgressDialog progressDialog;
     private Button signUp;
-    private EditText firstName,email,username,password,cpassword;
+    private EditText email,password,cpassword;
     private FirebaseAuth firebaseAuth;
-    private String ufirstName,uname,upass,ucpass,uemail;
+    private String upass,ucpass,uemail,uname,uage,usurname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_);
 
-        firstName = (EditText) findViewById(R.id.firstName);
         firebaseAuth = FirebaseAuth.getInstance();
         email = (EditText) findViewById(R.id.email);
         password = (EditText) findViewById(R.id.Password);
         cpassword = (EditText) findViewById(R.id.confirmPassword) ;
-        username = (EditText) findViewById(R.id.UserName);
         signUp = (Button) findViewById(R.id.SignUp);
         progressDialog = new ProgressDialog(this);
         loginPageAgain = (TextView) findViewById(R.id.LoginPageAgain);
@@ -65,7 +66,7 @@ public class SignUp_Activity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
                                         progressDialog.dismiss();
-                                        Toast.makeText(SignUp_Activity.this, "Successfully Registered!", Toast.LENGTH_SHORT).show();
+                                        sendEmailVerification();
                                         LogoLaucher logoLaucher = new LogoLaucher();
                                         logoLaucher.start();
                                     } else {
@@ -83,12 +84,10 @@ public class SignUp_Activity extends AppCompatActivity {
     private Boolean validate(){
         Boolean result=false;
 
-        ufirstName = firstName.getText().toString().trim();
-        uname = username.getText().toString().trim();
         uemail = email.getText().toString().trim();
         upass = password.getText().toString().trim();
         ucpass = cpassword.getText().toString().trim();
-        if(ufirstName.isEmpty()||uname.isEmpty()||uemail.isEmpty()||upass.isEmpty()||ucpass.isEmpty()){
+        if(uemail.isEmpty()||upass.isEmpty()||ucpass.isEmpty()){
             Toast.makeText(SignUp_Activity.this,"Please fill all the details!",Toast.LENGTH_SHORT).show();
         }else {
             if(!(upass.equals(ucpass))){
@@ -106,10 +105,33 @@ public class SignUp_Activity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Intent intent = new Intent(SignUp_Activity.this, MainActivity.class);
-            startActivity(intent);
-            SignUp_Activity.this.finish();
-
         }
+    }
+    private void sendEmailVerification(){
+        final FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        if(firebaseUser!=null){
+            firebaseUser.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()) {
+                        sendUserData();
+                        Toast.makeText(SignUp_Activity.this, "Successfully Registered, A verification mail is sent!", Toast.LENGTH_SHORT).show();
+                        firebaseAuth.signOut();
+                        finish();
+                        startActivity(new Intent(SignUp_Activity.this,MainActivity.class));
+                    }else{
+                        Toast.makeText(SignUp_Activity.this, "Verification mail hasn't been sent!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+    private void sendUserData(){
+        uage="";
+        uname="";
+        usurname="";
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference(firebaseAuth.getUid());
+        UserProfile userProfile = new UserProfile(uage,uemail,uname,usurname);
+        myRef.setValue(userProfile);
     }
 }
