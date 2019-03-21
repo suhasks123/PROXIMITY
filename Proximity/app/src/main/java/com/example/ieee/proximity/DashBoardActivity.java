@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -20,8 +22,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -40,6 +49,9 @@ public class DashBoardActivity extends AppCompatActivity {
     private FirebaseUser user;
     private SwipeRefreshLayout swipeRefreshLayout;
     boolean doubleBackToExitPressedOnce = false;
+    private FirebaseDatabase firebaseDatabase;
+    String name, surname;
+
 
 
     @Override
@@ -47,37 +59,53 @@ public class DashBoardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board);
 
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         toolbar = findViewById(R.id.toolbarMain);
         //toolbar.setTitle("Dashboard");
         user = firebaseAuth.getCurrentUser();
         swipeRefreshLayout = findViewById(R.id.swipe);
+        final FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 navigationDrawer();
+
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
         navigationDrawer();
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
         tx.replace(R.id.screen_area, new HomeFragment());
         tx.commit();
-        if (ActivityCompat.checkSelfPermission(DashBoardActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(DashBoardActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(DashBoardActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            return;
-        }else{
-            // Write you code here if permission already given.
-        }
+
+
     }
-    public void navigationDrawer(){
+
+    public void navigationDrawer() {
+        DatabaseReference myRef = firebaseDatabase.getReference(user.getUid());
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
         // Create the AccountHeader
         final AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("XYZ").withEmail(user.getEmail()).withIcon(getResources().getDrawable(R.drawable.logo))
+                        new ProfileDrawerItem().withName(name).withEmail(user.getEmail()).withIcon(getResources().getDrawable(R.drawable.logo))
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -86,6 +114,7 @@ public class DashBoardActivity extends AppCompatActivity {
                     }
                 })
                 .build();
+
 
         //if you want to update the items at a later time it is recommended to keep it in a variable
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home");
@@ -111,7 +140,7 @@ public class DashBoardActivity extends AppCompatActivity {
                         FragmentManager fragmentManager = getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                        switch (position){
+                        switch (position) {
                             case 1:
                                 swipeRefreshLayout.setRefreshing(true);
                                 toolbar.setTitle("Home");
@@ -129,7 +158,8 @@ public class DashBoardActivity extends AppCompatActivity {
                                 fragmentTransaction.commit();
                                 swipeRefreshLayout.setRefreshing(false);
                                 return false;
-                            case 3:swipeRefreshLayout.setRefreshing(true);
+                            case 3:
+                                swipeRefreshLayout.setRefreshing(true);
                                 toolbar.setTitle("Change Password");
                                 fragment = new ChangePassword();
 
@@ -137,9 +167,10 @@ public class DashBoardActivity extends AppCompatActivity {
                                 fragmentTransaction.commit();
                                 swipeRefreshLayout.setRefreshing(false);
                                 return false;
-                            case 4:firebaseAuth.signOut();
+                            case 4:
+                                firebaseAuth.signOut();
                                 DashBoardActivity.this.finish();
-                                startActivity(new Intent(DashBoardActivity.this,MainActivity.class));
+                                startActivity(new Intent(DashBoardActivity.this, MainActivity.class));
                                 break;
                         }
                         return true;
@@ -147,6 +178,7 @@ public class DashBoardActivity extends AppCompatActivity {
                 })
                 .build();
     }
+
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
@@ -161,7 +193,7 @@ public class DashBoardActivity extends AppCompatActivity {
 
             @Override
             public void run() {
-                doubleBackToExitPressedOnce=false;
+                doubleBackToExitPressedOnce = false;
             }
         }, 2000);
     }

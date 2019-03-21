@@ -2,6 +2,7 @@ package com.example.ieee.proximity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,6 +22,11 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.InputStream;
 
 public class SignUp_Activity extends AppCompatActivity {
 
@@ -28,13 +36,19 @@ public class SignUp_Activity extends AppCompatActivity {
     private EditText email,password,cpassword;
     private FirebaseAuth firebaseAuth;
     private String upass,ucpass,uemail,uname,uage,usurname;
+    private FirebaseStorage firebaseStorage;
+    private StorageReference storageReference;
+    Uri imagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_);
 
+        firebaseStorage = FirebaseStorage.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
+
+
         email = (EditText) findViewById(R.id.email);
         password = (EditText) findViewById(R.id.Password);
         cpassword = (EditText) findViewById(R.id.confirmPassword) ;
@@ -127,10 +141,26 @@ public class SignUp_Activity extends AppCompatActivity {
         }
     }
     private void sendUserData(){
+        imagePath = Uri.parse("android.resource://"+ getApplicationContext().getPackageName()+"/drawable/ic_action_defaultimg");
         uage="";
         uname="";
         usurname="";
+        storageReference = firebaseStorage.getReference(firebaseAuth.getUid()).child("Images").child("Profile Pic");
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference(firebaseAuth.getUid());
+        UploadTask uploadTask = storageReference.putFile(imagePath);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(SignUp_Activity.this,"Upload Failed!",Toast.LENGTH_SHORT).show();
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(SignUp_Activity.this,"Upload Successful!",Toast.LENGTH_SHORT).show();
+
+            }
+        });
         UserProfile userProfile = new UserProfile(uage,uemail,uname,usurname);
         myRef.setValue(userProfile);
     }
