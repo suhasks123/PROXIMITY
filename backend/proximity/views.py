@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.http import JsonResponse
 from .models import CurrentUser
 
 from fuzzywuzzy import fuzz
@@ -15,21 +16,33 @@ from fuzzywuzzy import process
 #def json_parse(j):
 #    cuser = json.loads(j)
 
+timesorted = []
+locationsorted = []
 
 
 #cuser is the dictionary obtained from the json file
 #the following data is the dummy data to just enable the views.py to compile without errors till we integrate json
-cuser={
-    'uid':'asdasdasd',
-    'interest':'kjdfskjdfhsjdf',
-    'x':829.283724,
-    'y':230.893124,
-    'time':[2,[32,[23,[[none]]]]]
-}
+#cuser = json.loads(request.body)
+
+def main(request):
+    cuser = json.loads(request.body.decode("utf-8"))
+    cuser['x'] = float(cuser['x'])
+    cuser['y'] = float(cuser['y'])
+    cuser['time'] = float(cuser['time'])
+    update(cuser)
+    location(timesorted)
+    data = interest(locationsorted)
+    return JsonResponse(data)
+#cuser={
+#    'uid':'asdasdasd',
+#    'interest':'kjdfskjdfhsjdf',
+#    'x':829.283724,
+#    'y':230.893124,
+#}
 
 #update - for every search request to the backend, it updates the location and time of an existing user or
 # creates a new query if the user requesting is new
-def update(request):
+def update(cuser):
     flag = 0
     i=0
     currentuser_set = CurrentUser.objects.all()
@@ -42,7 +55,8 @@ def update(request):
             currentuser.y = cuser['y']
             currentuser.time = cuser['time']
             flag = 1
-        if((cuser['time'].hour-currentuser.time.hour)==0 and (cuser['time'].minute-currentuser.time.minute)<=30):
+
+        if(cuser['time']-currentuser.time<=0.30):
                     timesorted[i]=currentuser.uid
                     i+=1
     if(flag==0):
@@ -51,7 +65,7 @@ def update(request):
                                 x=cuser['x'],
                                 y=cuser['y'],
                                 time=cuser['time'])
-    location(timesorted)
+    return
 
 
 #time - filters the whole database based on the recorded time of the previous request by all users in the database
@@ -71,24 +85,24 @@ def update(request):
 #location - it takes the list 'timesorted' and filters it further by their nearness to the current user
 def location(timesorted):
     i=0
-    rpx=cuser['x']+1
-    rnx=cuser['x']-1
-    rpy=cuser['y']+1
-    rny=cuser['y']-1
+    rpx=cuser['x']+0.0009
+    rnx=cuser['x']-0.0009
+    rpy=cuser['y']+0.0009
+    rny=cuser['y']-0.0009
     for user in timesorted:
         currentuser = CurrentUser.objects.filter(uid=user)
         if((currentuser.x<=rpx and currentuser.x>=rnx) and (currentuser.y<=rpy and currentuser.y>=rny)):
             locationsorted[i]=currentuser.uid
         i+=1
-    interest(locationsorted)
+    return
 
 
 def interest(lsorted):
     for user in lsorted:
         p_user.append(user)
         p_int.append(CurrentUser.objects.filter(uid=user).get(interest))
-    rank(CurrentUser.objects.filter(uid=cuser['uid']).get(interest),p_user,p_int)
-
+    d = rank(CurrentUser.objects.filter(uid=cuser['uid']).get(interest),p_user,p_int)
+    return d
 
 
 #INTEREST MATCHING STARTS HERE-----------------------------------------------
@@ -135,6 +149,11 @@ def rank(u_int,users,intval):
                 intval[j]=intval[j+1]
                 intval[j+1]=temp
     ctr=0
+    for ctr in range(p):
+        data.update({r[ctr]:users[ctr]})
+    return data
+
+
 #    for ctr in range(p):
 #        print(r[ctr],". ",users[ctr]," - ",intval[ctr])
 
