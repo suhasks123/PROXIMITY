@@ -24,7 +24,7 @@ locationsorted = []
 cuser = []
 p_user = []
 p_int = []
-data = {}
+data = []
 
 
 #cuser is the dictionary obtained from the json file
@@ -40,10 +40,10 @@ def main(request):
     cuser['y'] = float(cuser['y'])
     cuser['time'] = float(cuser['time'])
     update(cuser)
-    location(timesorted,cuser)
-    data = interest(locationsorted,cuser)
-    return JsonResponse(data)
-    #return HttpResponse(data)
+    location(cuser)
+    interest(cuser)
+    #return JsonResponse(data, safe=False)
+    return HttpResponse(data)
 
 
 #cuser={
@@ -56,6 +56,7 @@ def main(request):
 #update - for every search request to the backend, it updates the location and time of an existing user or
 # creates a new query if the user requesting is new
 def update(cuser):
+    global timesorted
     flag = 0
     i=0
     currentuser_set = CurrentUser.objects.all()
@@ -96,25 +97,31 @@ def update(cuser):
 
 
 #location - it takes the list 'timesorted' and filters it further by their nearness to the current user
-def location(timesorted,cuser):
+def location(cuser):
     i=0
-    rpx=cuser['x']+0.0009
-    rnx=cuser['x']-0.0009
-    rpy=cuser['y']+0.0009
-    rny=cuser['y']-0.0009
+    d=0.007
+    global locationsorted
+    rpx=cuser['x']+d
+    rnx=cuser['x']-d
+    rpy=cuser['y']+d
+    rny=cuser['y']-d
     for user in timesorted:
         currentuser = CurrentUser.objects.get(uid=user)
         #for u in currentuser:
         #    if((u.x<=rpx and u.x>=rnx) and (u.y<=rpy and u.y>=rny)):
         #        locationsorted.append(u.uid)
         if((currentuser.x<=rpx and currentuser.x>=rnx) and (currentuser.y<=rpy and currentuser.y>=rny)):
-            locationsorted.append(currentuser.uid)
+            locationsorted.append(user)
         i+=1
     return
 
 
-def interest(lsorted,cuser):
-    for user in lsorted:
+def interest(cuser):
+    global locationsorted
+    global p_user
+    global p_int
+    global data
+    for user in locationsorted:
         p_user.append(user)
         p_int.append(CurrentUser.objects.get(uid=user).interest)
     rank(CurrentUser.objects.get(uid=cuser['uid']).interest,p_user,p_int)
@@ -134,10 +141,11 @@ c=[]
 #this dictionary (p_int) is converted to two lists for easy use
 
 def rank(u_int,users,intval):
+    global data
+    global p_user
+    global p_int
     ctr=0
     p=len(users)
-    intval=[]
-    users=[]
     r=[]
     #print(users)
     #print(intval)
@@ -166,7 +174,9 @@ def rank(u_int,users,intval):
 #                intval[j+1]=temp
     ctr=0
     #for ctr in range(p-2):
-    data=dict(zip(users,r))
+    #data=dict(zip(users,r))
+    for u in users:
+        data.append({'uid':u})
     return
 
 
@@ -179,6 +189,7 @@ def rank(u_int,users,intval):
 #compare - compares the interest strings by organizing them into lists and then using fuzzy logic to compare each interest
 
 def compare(interest1, interest2):
+    global i1, i2
     organize(interest1, i1)
     organize(interest2, i2)
     ctr=0
@@ -190,13 +201,14 @@ def compare(interest1, interest2):
             n=fuzz.ratio(s1,s2)
             #print(s1," and ",s2," = ",n)
             if(n>=60):
-                c[i]=s1
                 cmn+=1
+                i+=1
     return cmn
 
 #organize - divides the interest string into a list of seperate interests
 
-def organize(str, arr):
+def organize(str,arr):
+    s=''
     ctr=0
     for l in str:
         if(l==';'):
