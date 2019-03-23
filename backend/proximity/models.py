@@ -6,7 +6,7 @@ class CurrentUser(models.Model):
     interest = models.TextField()
     x = models.FloatField(default=0.0)
     y = models.FloatField(default=0.0)
-    time = models.TimeField()
+    time = models.FloatField(default=0.0)
 
 #class Blog(models.Model):
 #    title = models.CharField(max_length=100)
