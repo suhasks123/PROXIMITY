@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import CurrentUser
+
+import json
 
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
@@ -18,21 +21,31 @@ from fuzzywuzzy import process
 
 timesorted = []
 locationsorted = []
+cuser = []
+p_user = []
+p_int = []
+data = {}
 
 
 #cuser is the dictionary obtained from the json file
 #the following data is the dummy data to just enable the views.py to compile without errors till we integrate json
 #cuser = json.loads(request.body)
-
+@csrf_exempt
 def main(request):
-    cuser = json.loads(request.body.decode("utf-8"))
+    #if request.method == "POST":
+    #cuser = json.loads(request.body)
+    x='{"uid":"ryuhsirjshasdbbrus","interest":"sports;art;music;drama","x":"74.78929","y":"13.24532","time":"15.27"}'
+    cuser = json.loads(x)
     cuser['x'] = float(cuser['x'])
     cuser['y'] = float(cuser['y'])
     cuser['time'] = float(cuser['time'])
     update(cuser)
-    location(timesorted)
-    data = interest(locationsorted)
-    return JsonResponse(data)
+    location(timesorted,cuser)
+    data = interest(locationsorted,cuser)
+    #return JsonResponse(data)
+    return HttpResponse(data)
+
+
 #cuser={
 #    'uid':'asdasdasd',
 #    'interest':'kjdfskjdfhsjdf',
@@ -57,7 +70,7 @@ def update(cuser):
             flag = 1
 
         if(cuser['time']-currentuser.time<=0.30):
-                    timesorted[i]=currentuser.uid
+                    timesorted.append(currentuser.uid)
                     i+=1
     if(flag==0):
         CurrentUser.objects.create(uid=cuser['uid'],
@@ -83,26 +96,29 @@ def update(cuser):
 
 
 #location - it takes the list 'timesorted' and filters it further by their nearness to the current user
-def location(timesorted):
+def location(timesorted,cuser):
     i=0
     rpx=cuser['x']+0.0009
     rnx=cuser['x']-0.0009
     rpy=cuser['y']+0.0009
     rny=cuser['y']-0.0009
     for user in timesorted:
-        currentuser = CurrentUser.objects.filter(uid=user)
+        currentuser = CurrentUser.objects.get(uid=user)
+        #for u in currentuser:
+        #    if((u.x<=rpx and u.x>=rnx) and (u.y<=rpy and u.y>=rny)):
+        #        locationsorted.append(u.uid)
         if((currentuser.x<=rpx and currentuser.x>=rnx) and (currentuser.y<=rpy and currentuser.y>=rny)):
-            locationsorted[i]=currentuser.uid
+            locationsorted.append(currentuser.uid)
         i+=1
     return
 
 
-def interest(lsorted):
+def interest(lsorted,cuser):
     for user in lsorted:
         p_user.append(user)
-        p_int.append(CurrentUser.objects.filter(uid=user).get(interest))
-    d = rank(CurrentUser.objects.filter(uid=cuser['uid']).get(interest),p_user,p_int)
-    return d
+        p_int.append(CurrentUser.objects.get(uid=user).interest)
+    rank(CurrentUser.objects.get(uid=cuser['uid']).interest,p_user,p_int)
+    return
 
 
 #INTEREST MATCHING STARTS HERE-----------------------------------------------
@@ -134,24 +150,24 @@ def rank(u_int,users,intval):
         r.append(compare(u_int,intval[ctr]))
         ctr+=1
     #the following for loop sorts the list of users based on the number of common interests they have with the current user
-    for i in range(p):
-        for j in range(0,p-1-i):
-            if(r[j]<r[j+1]):
-                temp=r[j]
-                r[j]=r[j+1]
-                r[j+1]=temp
-
-                temp=users[j]
-                users[j]=users[j+1]
-                users[j+1]=temp
-
-                temp=intval[j]
-                intval[j]=intval[j+1]
-                intval[j+1]=temp
+    #for i in range(p):
+    #    for j in range(0,p-1-i):
+    #        if(r[j]<r[j+1]):
+    #            temp=r[j]
+    #            r[j]=r[j+1]
+    #            r[j+1]=temp
+#
+#                temp=users[j]
+#                users[j]=users[j+1]
+#                users[j+1]=temp
+#
+#                temp=intval[j]
+#                intval[j]=intval[j+1]
+#                intval[j+1]=temp
     ctr=0
-    for ctr in range(p):
-        data.update({r[ctr]:users[ctr]})
-    return data
+    #for ctr in range(p-2):
+    data=dict(zip(users,r))
+    return
 
 
 #    for ctr in range(p):
