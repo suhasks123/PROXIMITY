@@ -32,18 +32,18 @@ data = {}
 #cuser = json.loads(request.body)
 @csrf_exempt
 def main(request):
-    #if request.method == "POST":
-    #cuser = json.loads(request.body)
-    x='{"uid":"ryuhsirjshasdbbrus","interest":"sports;art;music;drama","x":"74.78929","y":"13.24532","time":"15.27"}'
-    cuser = json.loads(x)
+    if request.method == "POST":
+        cuser = json.loads(request.body)
+    #x='{"uid":"ryuhsirjshasdbbrus","interest":"sports;art;music;drama","x":"74.78929","y":"13.24532","time":"15.27"}'
+    #cuser = json.loads(x)
     cuser['x'] = float(cuser['x'])
     cuser['y'] = float(cuser['y'])
     cuser['time'] = float(cuser['time'])
     update(cuser)
     location(timesorted,cuser)
     data = interest(locationsorted,cuser)
-    #return JsonResponse(data)
-    return HttpResponse(data)
+    return JsonResponse(data)
+    #return HttpResponse(data)
 
 
 #cuser={
