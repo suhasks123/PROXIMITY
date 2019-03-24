@@ -26,6 +26,12 @@ public class UserProfile {
         this.uid = uid;
     }
 
+    public UserProfile(String userTime, Double userLatitude,Double userLongitude){
+        this.userTime = userTime;
+        this.userLatitude = userLatitude;
+        this.userLongitude = userLongitude;
+    }
+
     public UserProfile(){
 
     }
