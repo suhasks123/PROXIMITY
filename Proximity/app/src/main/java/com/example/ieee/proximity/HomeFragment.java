@@ -1,8 +1,19 @@
 package com.example.ieee.proximity;
 
 import android.Manifest;
+import android.app.LauncherActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -14,17 +25,29 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.annotations.NotNull;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class HomeFragment extends Fragment implements LocationListener {
 
@@ -33,7 +56,11 @@ public class HomeFragment extends Fragment implements LocationListener {
     private Button find;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private FusedLocationProviderClient client;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private static final String URI_DATA = "http://35.171.83.86/uids.json";
 
+    private List<UserProfile> userProfiles;
 
     @Nullable
     @Override
@@ -44,10 +71,21 @@ public class HomeFragment extends Fragment implements LocationListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+5:30"));
+        Date currentLocalTime = cal.getTime();
+        DateFormat date = new SimpleDateFormat("HH:mm a");
+// you can get seconds by adding  "...:ss" to it
+        date.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
 
+        final String localTime = date.format(currentLocalTime);
 
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        userProfiles = new ArrayList<>();
         find = view.findViewById(R.id.btnFind);
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        client = LocationServices.getFusedLocationProviderClient(getActivity());
 
         provider = locationManager.getBestProvider(new Criteria(), false);
 
@@ -55,23 +93,58 @@ public class HomeFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 if (checkLocationPermission()) {
-
-                    client = LocationServices.getFusedLocationProviderClient(getActivity());
                     client.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
                             if (location != null) {
 //                            textView.setText(Double.toString(location.getLongitude())+","+Double.toString(location.getLatitude()));
-                                Toast.makeText(getActivity(), Double.toString(location.getLongitude()) + "," + Double.toString(location.getLatitude()), Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(), Double.toString(location.getLongitude()) + ", " + Double.toString(location.getLatitude())+", "+localTime.substring(0,5), Toast.LENGTH_LONG).show();
                             }
 
                         }
                     });
-
+                    loadRecyclerViewData();
                 }
             }
         });
 
+    }
+
+    private void loadRecyclerViewData(){
+        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage("Loading data...");
+        progressDialog.show();
+
+        StringRequest stringRequest =new StringRequest(Request.Method.GET,
+                URI_DATA, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                progressDialog.dismiss();
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+                    for(int i=0; i<jsonArray.length(); i++){
+                        JSONObject arrayObject = jsonArray.getJSONObject(i);
+                        UserProfile userProfile = new UserProfile(arrayObject.getString("uid"));
+                        userProfiles.add(userProfile);
+                    }
+
+                    adapter = new MyAdapter(getActivity().getApplicationContext(),userProfiles);
+                    recyclerView.setAdapter(adapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(getActivity().getApplicationContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
+        requestQueue.add(stringRequest);
     }
 
     public boolean checkLocationPermission() {

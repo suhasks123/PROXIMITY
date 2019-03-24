@@ -46,7 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Button btnUpload1;
     private ImageView profileImage1;
     private TextView profileEmail1;
-    private EditText profileName1, profileSurName1, profileAge1;
+    private EditText profileName1, profileSurName1, profileAge1,profileInterest1;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private FirebaseDatabase firebaseDatabase;
@@ -93,6 +93,7 @@ public class ProfileActivity extends AppCompatActivity {
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         btnUpload1 = findViewById(R.id.btnUpload1);
+        profileInterest1 = findViewById(R.id.profileInterest1);
         profileAge1 = findViewById(R.id.profileAge1);
         profileName1 = findViewById(R.id.profileName1);
         profileSurName1 = findViewById(R.id.profileSurName1);
@@ -122,6 +123,7 @@ public class ProfileActivity extends AppCompatActivity {
                 profileAge1.setText(userProfile.getUserAge());
                 profileName1.setText(userProfile.getUserName());
                 profileSurName1.setText(userProfile.getUserSurName());
+                profileInterest1.setText(userProfile.getUserInterest());
 
             }
 
@@ -148,10 +150,11 @@ public class ProfileActivity extends AppCompatActivity {
                 String name = profileName1.getText().toString();
                 String surname = profileSurName1.getText().toString();
                 String age = profileAge1.getText().toString();
-                if(name.isEmpty()||surname.isEmpty()||age.isEmpty()) {
+                String interest = profileInterest1.getText().toString();
+                if(name.isEmpty()||surname.isEmpty()||age.isEmpty()||interest.isEmpty()) {
                     Toast.makeText(ProfileActivity.this,"Fill all the details",Toast.LENGTH_SHORT).show();
                 }else{
-                    UserProfile userProfile = new UserProfile(age, firebaseUser.getEmail(), name, surname);
+                    UserProfile userProfile = new UserProfile(age,firebaseUser.getEmail(), name, surname,"",interest,0.0,0.0);
                     myRef.setValue(userProfile)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override

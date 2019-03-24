@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DashBoardActivity"
+    android:id="@+id/dash_id">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:id="@+id/toolbarMain"
+            android:gravity="top"
+            app:title="Home"
+            app:titleMargin="@dimen/material_drawer_account_header_dropdown_margin_bottom">
+
+        </android.support.v7.widget.Toolbar>
+
+        <FrameLayout
+            android:id="@+id/screen_area"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </FrameLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+</RelativeLayout>

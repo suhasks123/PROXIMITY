@@ -6,13 +6,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserProfile {
-    public String userAge,userEmail,userName,userSurName;
+    public String userAge,userEmail,userName,userSurName,userTime, userInterest;
+    public Double userLatitude,userLongitude;
+    public String uid;
 
-    public UserProfile(String userAge, String userEmail, String userName, String userSurName) {
+    public UserProfile(String userAge, String userEmail, String userName, String userSurName
+                        , String userTime, String userInterest, Double userLatitude, Double userLongitude) {
         this.userAge = userAge;
         this.userEmail = userEmail;
         this.userName = userName;
         this.userSurName = userSurName;
+        this.userTime = userTime;
+        this.userInterest = userInterest;
+        this.userLatitude = userLatitude;
+        this.userLongitude = userLongitude;
+    }
+
+    public UserProfile(String uid){
+        this.uid = uid;
     }
 
     public UserProfile(){
@@ -35,12 +46,24 @@ public class UserProfile {
         return userSurName;
     }
 
-    @Exclude
-    public Map<String, Object> toMap() {
-        HashMap<String, Object> result = new HashMap<>();
-        result.put("userAge", userAge);
-        result.put("userName", userName);
-        result.put("userSurName", userSurName);
-        return result;
+    public String getUserTime() {
+        return userTime;
     }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public String getUserInterest() {
+        return userInterest;
+    }
+
+    public Double getUserLatitude() {
+        return userLatitude;
+    }
+
+    public Double getUserLongitude() {
+        return userLongitude;
+    }
+
 }

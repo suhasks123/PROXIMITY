@@ -44,14 +44,14 @@ public class ProfileFragmemt extends Fragment{
 
     private TextView tvEmail;
     private Button upLoad;
-    private EditText etName,etSurName,etAge;
+    private EditText etName,etSurName,etAge,etInterest;
     private ImageView imProfilePic;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private FirebaseDatabase firebaseDatabase;
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
-    String name,age,email,surname;
+    String name,age,email,surname,interest;
     private static int PICK_IMAGE = 960;
     private Uri imagePath;
 
@@ -89,6 +89,7 @@ public class ProfileFragmemt extends Fragment{
         tvEmail = view.findViewById(R.id.profileEmailView);
         etName = view.findViewById(R.id.profileName);
         etSurName = view.findViewById(R.id.profileSurName);
+        etInterest = view.findViewById(R.id.profileInterest);
         etAge = view.findViewById(R.id.profileAge);
         imProfilePic = view.findViewById(R.id.profileImage);
         upLoad = view.findViewById(R.id.btnUpload);
@@ -100,12 +101,6 @@ public class ProfileFragmemt extends Fragment{
 
         final DatabaseReference mRef = firebaseDatabase.getReference(firebaseAuth.getUid());
 
-
-
-        age = etAge.getText().toString();
-        email = tvEmail.getText().toString();
-        name = etName.getText().toString();
-        surname = etSurName.getText().toString();
 
         imProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,8 +120,8 @@ public class ProfileFragmemt extends Fragment{
                 etAge.setText(userProfile.getUserAge());
                 etName.setText(userProfile.getUserName());
                 etSurName.setText(userProfile.getUserSurName());
-                tvEmail.setText("Email:   "+userProfile.userEmail);
-
+                tvEmail.setText("Email:   "+userProfile.getUserEmail());
+                etInterest.setText(userProfile.getUserInterest());
             }
 
             @Override
@@ -151,11 +146,12 @@ public class ProfileFragmemt extends Fragment{
                 email = tvEmail.getText().toString();
                 name = etName.getText().toString();
                 surname = etSurName.getText().toString();
+                interest = etInterest.getText().toString();
 
-                if(name.isEmpty()||surname.isEmpty()||age.isEmpty()) {
+                if(name.isEmpty()||surname.isEmpty()||age.isEmpty()||interest.isEmpty()) {
                     Toast.makeText(getActivity(),"Fill all the details",Toast.LENGTH_SHORT).show();
                 }else{
-                    UserProfile userProfile = new UserProfile(age, firebaseUser.getEmail(), name, surname);
+                    UserProfile userProfile = new UserProfile(age, firebaseUser.getEmail(), name, surname, "", interest, 0.0,0.0);
                     mRef.setValue(userProfile)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override

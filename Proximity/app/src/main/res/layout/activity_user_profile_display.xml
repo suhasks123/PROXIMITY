@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserProfileDisplay">
+
+    <ImageView
+        android:id="@+id/profileImage2"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        app:srcCompat="@drawable/ic_action_defaultimg" />
+
+
+    <TextView
+        android:id="@+id/profileEmailView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        android:layout_below="@+id/profileImage2"
+        />
+
+    <TextView
+        android:id="@+id/profileFullName2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Name"
+        android:layout_below="@+id/profileEmailView2"
+        android:inputType="text"
+        android:layout_margin="15dp"
+        android:layout_centerHorizontal="true"/>
+
+
+    <TextView
+        android:id="@+id/profileAge2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileFullName2"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        android:ems="10"
+        android:hint="Age"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/profileInterest2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileAge2"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        android:hint="Interest"
+        android:ems="10"
+        android:inputType="text"
+        />
+
+    <Button
+        android:id="@+id/btnLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location"
+        android:layout_below="@+id/profileInterest2"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_margin="15dp"
+        android:layout_margin="5dp"
         android:layout_below="@+id/imageNotice"
         />
 
@@ -43,14 +43,14 @@
         android:hint="Name"
         android:layout_below="@+id/profileEmailView1"
         android:inputType="text"
-        android:layout_margin="15dp"
+        android:layout_margin="5dp"
         android:layout_centerHorizontal="true"/>
 
     <EditText
         android:id="@+id/profileSurName1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
+        android:layout_margin="5dp"
         android:layout_below="@+id/profileName1"
         android:ems="10"
         android:hint="Surname"
@@ -63,20 +63,29 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/profileSurName1"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="15dp"
+        android:layout_margin="5dp"
         android:ems="10"
         android:hint="Age"
         android:inputType="number" />
+
+    <EditText
+        android:id="@+id/profileInterest1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileAge1"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:hint="Interest"
+        android:ems="10"
+        android:inputType="text"
+        />
 
     <Button
         android:id="@+id/btnUpload1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Upload"
-        android:layout_below="@+id/profileAge1"
+        android:layout_below="@+id/profileInterest1"
         android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

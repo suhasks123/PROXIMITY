@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp">
+
+    <ImageView
+        android:id="@+id/profileImage"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@drawable/ic_action_defaultimg" />
+
+    <TextView
+        android:id="@+id/imageNote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Click on the above image for new Profile Pic"
+        android:textSize="15dp"
+        android:layout_below="@+id/profileImage"
+        android:layout_marginBottom="15dp"
+        android:layout_marginHorizontal="15dp"/>
+
+    <TextView
+        android:id="@+id/profileEmailView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        android:layout_below="@+id/imageNote"
+        />
+
+    <EditText
+        android:id="@+id/profileName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Name"
+        android:layout_below="@+id/profileEmailView"
+        android:inputType="text"
+        android:layout_margin="15dp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name:"
+        android:layout_alignBaseline="@+id/profileName"
+        android:layout_toLeftOf="@+id/profileName"/>
+
+    <EditText
+        android:id="@+id/profileSurName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:layout_below="@+id/profileName"
+        android:ems="10"
+        android:hint="Surname"
+        android:inputType="text"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/profileSurName"
+        android:layout_toLeftOf="@+id/profileSurName"
+        android:text="Surname:"/>
+
+    <EditText
+        android:id="@+id/profileAge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileSurName"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:ems="10"
+        android:hint="Age"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/profileAge"
+        android:layout_toLeftOf="@+id/profileAge"
+        android:text="Age:"/>
+
+    <Button
+        android:id="@+id/btnUpload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload"
+        android:layout_below="@+id/profileAge"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

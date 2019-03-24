@@ -141,7 +141,7 @@ public class SignUp_Activity extends AppCompatActivity {
         }
     }
     private void sendUserData(){
-        imagePath = Uri.parse("android.resource://"+ getApplicationContext().getPackageName()+"/drawable/ic_action_defaultimg");
+        imagePath = Uri.parse("android.resource://com.example.ieee.proximity/drawable/ic_action_defaultimg");
         uage="";
         uname="";
         usurname="";
@@ -161,7 +161,7 @@ public class SignUp_Activity extends AppCompatActivity {
 
             }
         });
-        UserProfile userProfile = new UserProfile(uage,uemail,uname,usurname);
+        UserProfile userProfile = new UserProfile(uage,firebaseAuth.getCurrentUser().getEmail(),uname,usurname,"","",0.0,0.0);
         myRef.setValue(userProfile);
     }
 }
