@@ -4,6 +4,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,6 +60,11 @@ public class UserProfileDisplay extends AppCompatActivity {
                 fullName.setText("Name: "+ userProfile.getUserName()+" "+userProfile.getUserSurName());
                 email.setText("Email: "+userProfile.getUserEmail());
                 interest.setText("Interest: "+userProfile.getUserInterest());
+
+                location.setMovementMethod(LinkMovementMethod.getInstance());
+                String text = "http://www.google.com/maps/place/"+Double.toString(userProfile.userLatitude)+","+Double.toString(userProfile.getUserLongitude());
+                String text1 = "<a href="+text+"> Location </a>";
+                location.setText(Html.fromHtml(text1));
             }
 
             @Override
@@ -72,6 +79,8 @@ public class UserProfileDisplay extends AppCompatActivity {
                 Picasso.get().load(uri).into(image);
             }
         });
+
+
 
     }
 }

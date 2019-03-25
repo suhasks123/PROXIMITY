@@ -39,6 +39,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -70,7 +71,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     private FusedLocationProviderClient client;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
-    private static final String URI_DATA = "http://35.171.83.86/uids.json";
+    private static final String URI_DATA = "http://10.53.77.21:8000/proximity/main/";
     private FirebaseUser firebaseUser;
     private DatabaseReference myRef;
     private StorageReference storageReference;
@@ -103,8 +104,7 @@ public class HomeFragment extends Fragment implements LocationListener {
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         client = LocationServices.getFusedLocationProviderClient(getActivity());
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        myRef = FirebaseDatabase.getInstance().getReference(firebaseUser.getUid());
-        storageReference = FirebaseStorage.getInstance().getReference(firebaseUser.getUid());
+        myRef = FirebaseDatabase.getInstance().getReference(FirebaseAuth.getInstance().getUid());
 
         provider = locationManager.getBestProvider(new Criteria(), false);
 
@@ -122,22 +122,59 @@ public class HomeFragment extends Fragment implements LocationListener {
                                 progressDialog.setMessage("Loading data...");
                                 progressDialog.show();
 
-                                UserProfile userProfile = new UserProfile(localTime,location.getLatitude(),location.getLongitude());
-                                myRef.setValue(userProfile);
+
 
                                 final JSONObject jsonObject = new JSONObject();
                                 myRef.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                         UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
+                                        UserProfile userProfile1 = new UserProfile(userProfile.getUserAge(),userProfile.getUserEmail(),userProfile.getUserName()
+                                                ,userProfile.getUserSurName(),localTime,userProfile.getUserInterest(),location.getLatitude(),location.getLongitude());
+                                        myRef.setValue(userProfile1);
                                         try {
-                                            jsonObject.put("uid",userProfile.getUid());
+                                            jsonObject.put("uid",FirebaseAuth.getInstance().getUid());
                                             jsonObject.put("interest",userProfile.getUserInterest());
                                             jsonObject.put("x",Double.toString(location.getLongitude()));
                                             jsonObject.put("y",Double.toString(location.getLatitude()));
                                             jsonObject.put("time",localTime.substring(0,2)+"."+localTime.substring(3,5));
+
+                                            //Toast.makeText(getActivity(),jsonObject.toString(),Toast.LENGTH_LONG).show();
+
+                                            CustomJsonArrayRequest customJsonArrayRequest = new CustomJsonArrayRequest(Request.Method.POST,
+                                                    URI_DATA, jsonObject , new Response.Listener<JSONArray>() {
+                                                @Override
+                                                public void onResponse(JSONArray response) {
+                                                    progressDialog.dismiss();
+                                                    try {
+                                                        for(int i=0; i<response.length(); i++){
+                                                            JSONObject arrayObject = response.getJSONObject(i);
+                                                            UserProfile userProfile = new UserProfile(arrayObject.getString("uid"));
+                                                            userProfiles.add(userProfile);
+                                                        }
+
+                                                        adapter = new MyAdapter(getActivity().getApplicationContext(),userProfiles);
+                                                        recyclerView.setAdapter(adapter);
+                                                    } catch (JSONException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }, new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    progressDialog.dismiss();
+                                                    Toast.makeText(getActivity().getApplicationContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
+
+                                                }
+                                            });
+
+
+                                            RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
+                                            requestQueue.add(customJsonArrayRequest);
+
                                         } catch (JSONException e) {
                                             e.printStackTrace();
+                                            Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT).show();
                                         }
 
                                     }
@@ -148,37 +185,7 @@ public class HomeFragment extends Fragment implements LocationListener {
                                     }
                                 });
 
-                                JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                                        URI_DATA, jsonObject , new Response.Listener<JSONArray>() {
-                                    @Override
-                                    public void onResponse(JSONArray response) {
-                                        progressDialog.dismiss();
-                                        try {
-                                            for(int i=0; i<response.length(); i++){
-                                                JSONObject arrayObject = response.getJSONObject(i);
-                                                UserProfile userProfile = new UserProfile(arrayObject.getString("uid"));
-                                                userProfiles.add(userProfile);
-                                            }
-
-                                            adapter = new MyAdapter(getActivity().getApplicationContext(),userProfiles);
-                                            recyclerView.setAdapter(adapter);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        progressDialog.dismiss();
-                                        Toast.makeText(getActivity().getApplicationContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
-
-                                    }
-                                });
-
-
-                                RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-                                requestQueue.add(jsonArrayRequest);
-                            }
+                                                            }
 
                         }
                     });
