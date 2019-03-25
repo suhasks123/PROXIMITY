@@ -124,7 +124,7 @@ def interest(cuser):
     for user in locationsorted:
         p_user.append(user)
         p_int.append(CurrentUser.objects.filter(uid=user).first().interest)
-    rank(CurrentUser.objects.get(uid=cuser['uid']).interest,p_user,p_int)
+    rank(CurrentUser.objects.filter(uid=cuser['uid']).first().interest,p_user,p_int)
     return
 
 
