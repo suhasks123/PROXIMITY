@@ -42,8 +42,8 @@ def main(request):
     update(cuser)
     location(cuser)
     interest(cuser)
-    #return JsonResponse(data, safe=False)
-    return HttpResponse(data)
+    return JsonResponse(data, safe=False)
+    #return HttpResponse(data)
 
 
 #cuser={
@@ -106,7 +106,7 @@ def location(cuser):
     rpy=cuser['y']+d
     rny=cuser['y']-d
     for user in timesorted:
-        currentuser = CurrentUser.objects.get(uid=user)
+        currentuser = CurrentUser.object.filter(uid=user).first()
         #for u in currentuser:
         #    if((u.x<=rpx and u.x>=rnx) and (u.y<=rpy and u.y>=rny)):
         #        locationsorted.append(u.uid)
