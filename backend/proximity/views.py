@@ -106,7 +106,7 @@ def location(cuser):
     rpy=cuser['y']+d
     rny=cuser['y']-d
     for user in timesorted:
-        currentuser = CurrentUser.object.filter(uid=user).first()
+        currentuser = CurrentUser.objects.filter(uid=user).first()
         #for u in currentuser:
         #    if((u.x<=rpx and u.x>=rnx) and (u.y<=rpy and u.y>=rny)):
         #        locationsorted.append(u.uid)
