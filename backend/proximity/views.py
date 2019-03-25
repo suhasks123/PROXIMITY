@@ -123,7 +123,7 @@ def interest(cuser):
     global data
     for user in locationsorted:
         p_user.append(user)
-        p_int.append(CurrentUser.objects.get(uid=user).interest)
+        p_int.append(CurrentUser.objects.filter(uid=user).first().interest)
     rank(CurrentUser.objects.get(uid=cuser['uid']).interest,p_user,p_int)
     return
 
