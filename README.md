@@ -8,4 +8,5 @@ Files and Folders:
 
 
 Developed by: Ameya Neeraj Deshpande (Android) and Suhas K S (Backend)
+
 Mentors     : Akash Nair, Aakash Singh and Vaibhav G
